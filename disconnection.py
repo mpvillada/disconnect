@@ -7,7 +7,7 @@ import sys
 import getopt
 import os
 import traceback
-# TODO
+
 import logging
 logging.getLogger("scapy.runtime").setLevel(logging.ERROR)
 from scapy.all import *
@@ -30,7 +30,6 @@ class Scanner:
 		remove.wait()
 
 		#scanner = subprocess.Popen("airodump-ng -c 1 -w dump --output-format=csv mon0".split(),stdout=self.DEVNULL, stderr=self.DEVNULL)
-		# --berlin secs: segundos desde que se detecta el ultimo paquete hasta que se elimina de la lista
 		cmd = "./airodump-mod --berlin 10 -w dump --output-format=csv " + self.monitor
 		if self.channel != None:
 			cmd = cmd + " -c " + self.channel
@@ -160,7 +159,7 @@ class DisconnectStrat:
 	def setChannel(self, channel):
 		if self.currentChannel == channel:
 			return True
-		# TODO: cambiar el canal tambien para wlanX antes de cambiar los monitores
+		
 		for nmon in range(self.monitors):
 			monitor = "mon" + str(nmon + 1)
 			print "Set channel", channel, "in monitor", monitor
@@ -317,9 +316,6 @@ class Disconnect:
 			stations = self.scanner.getStations()
 
 		for channel in aps:
-			#print "trying channel", channel
-			#print "aps", self.aps
-			#print "stations", self.stations
 			channelOk = self.strat.setChannel(channel)
 			if not channelOk:
 				continue
@@ -328,7 +324,6 @@ class Disconnect:
 			for ap in aps[channel]:
 				if self.whitelist and ap in self.whitelist or self.blacklist and ap not in self.blacklist:
 					pass
-					#print "ignoring", ap
 				else:
 					self.strat.disconnectBroadcast(ap)
 					victim_list = []
@@ -401,20 +396,20 @@ def usage():
 	print " > " + __file__ + " [-h] [-d] [-l] [-c channel] [-s scan_iface] [-i attack_iface[,iface2,iface3]] [-w whitelistfile] [-b blacklistfile] [-p power]"
 	print " Options:"
 	print "   -h: help"
-	print "   -a: Modo agresivo, intenta con todas las combinaciones de ap-station"
-	print "   -r: Remember, el programa recuerda las redes a las que una red ya ha estado conectada anteriormente y le envia desconexiones para siempre"
-	print "   -n: Metodo de envio de paquetes nativo en vez de utilizar el aireplay. Hay menos overhead"
-	print "   -D: Debug disconnector: no ejecuta el proceso de desconexion"
-	print "   -d: Debug scanner: No hace un escaneo real, sino que saca los datos del fichero \"dump-01.csv\"."
-	print "       Este fichero debe contener los datos en el mismo formato que el generado por el comando:"
+	print "   -a: Aggresive mode, try every combination of ap-station"
+	print "   -r: Remember, send disconnects forever once station has been spotted"
+	print "   -n: Native mode instead of aireplay"
+	print "   -D: Debug disconnector: Don't execute disconnection"
+	print "   -d: Debug scanner: not a real scan, it gets the data from file \"dump-01.csv\"."
+	print "       File format must be the same as the output of:"
 	print "         > airodump-ng -w dump --output-format=csv mon0" 
-	print "   -l: La salida de los intentos de desconexion queda logueada en ficheros con el nombre \"disconnection.station.ap.log\""
-	print "   -c: Seleccionar solo un canal para escaneo/ataque"
-	print "   -s: Seleccionar en que interfaz se realizara el escaneo"
-	print "   -i: Seleccionar en que interfaz se realizara el ataque. Puede ser una lista de interfaces distintos separados por comas"
-	print "   -w: Whitelist, selecciona las MACs de los aps que SI tienen permitida la conexion"
-	print "   -b: Blacklist, selecciona las MACs de los aps que NO tienen permitida la conexion"
-	print "   -p: Selecciona la potencia del interfaz de ataque"
+	print "   -l: log into file \"disconnection.station.ap.log\""
+	print "   -c: Channel to scan"
+	print "   -s: Select scan interface"
+	print "   -i: Select attack interface. it can be a comma-separated list"
+	print "   -w: MACs Whitelist"
+	print "   -b: MACs Blacklist."
+	print "   -p: Power of the attack interface"
 
 		
 def build(argv):
